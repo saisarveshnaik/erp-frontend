@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/sectioncard.tsx","./src/components/dashboard/dashboardpage.tsx","./src/components/layout/sidebar.tsx","./src/components/layout/topbar.tsx","./src/components/spec/specpagerenderer.tsx","./src/data/specconfig.ts","./src/types/spec.ts"],"version":"5.9.3"}
