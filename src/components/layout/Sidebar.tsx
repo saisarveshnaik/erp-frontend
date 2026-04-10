@@ -326,7 +326,8 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                           const isOpen = openSubmoduleKey === submoduleKey;
                           const isActiveSubmodule = activeSubmoduleKey === submoduleKey;
                           const submoduleFirstPath = submodule.screens[0]?.path ?? getFirstModulePath(module.id);
-                          const hasDropdown = submodule.screens.length > 1 || module.id !== "dashboard";
+                          const isEmployeeQuickAccess = module.id === "hr" && submodule.id === "employees";
+                          const hasDropdown = !isEmployeeQuickAccess && (submodule.screens.length > 1 || module.id !== "dashboard");
 
                           if (!hasDropdown) {
                             return (
