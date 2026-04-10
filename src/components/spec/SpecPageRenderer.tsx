@@ -41,15 +41,15 @@ const buildRows = (columns: string[], count = 6) =>
     })
   );
 
-const FormSectionList = ({ fields }: { fields: FormField[] }) => (
+const FormSectionList = ({ fields, readOnly = false }: { fields: FormField[]; readOnly?: boolean }) => (
   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
     {fields.map((field) => (
       <label key={field.label} className="rounded-xl border border-border bg-white p-3">
         <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">{field.label}</span>
         <input
           type="text"
-          value={inputTypeLabel[field.type]}
-          readOnly
+          placeholder={inputTypeLabel[field.type]}
+          readOnly={readOnly}
           className="h-9 w-full rounded-lg border border-border bg-page px-3 text-sm text-slate-600"
         />
       </label>
@@ -62,13 +62,40 @@ type ListActionModalType = "create" | "edit" | "profile";
 const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const isEmployeeListScreen = screen.id === "employees-list";
   const isDepartmentListScreen = screen.id === "departments-list";
-  const hasInlineActions = isEmployeeListScreen || isDepartmentListScreen;
+  const isDesignationListScreen = screen.id === "designations-list";
+  const isAttendanceListScreen = screen.id === "attendance-list";
+  const isLeaveTypeListScreen = screen.id === "leave-types-list";
+  const isLeaveRequestListScreen = screen.id === "leave-request-list";
+  const isDocumentListScreen = screen.id === "documents-list";
+  const isAssetListScreen = screen.id === "assets-list";
+  const hasInlineActions =
+    isEmployeeListScreen ||
+    isDepartmentListScreen ||
+    isDesignationListScreen ||
+    isAttendanceListScreen ||
+    isLeaveTypeListScreen ||
+    isLeaveRequestListScreen ||
+    isDocumentListScreen ||
+    isAssetListScreen;
   const columns = screen.tableColumns ?? ["Name", "Status"];
   const rows = useMemo(() => buildRows(columns), [columns]);
   const [employeeModalType, setEmployeeModalType] = useState<ListActionModalType | null>(null);
   const [selectedEmployeeRow, setSelectedEmployeeRow] = useState<number | null>(null);
+  const [isEmployeeProfileEditable, setIsEmployeeProfileEditable] = useState(false);
   const [departmentModalType, setDepartmentModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
   const [selectedDepartmentRow, setSelectedDepartmentRow] = useState<number | null>(null);
+  const [designationModalType, setDesignationModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedDesignationRow, setSelectedDesignationRow] = useState<number | null>(null);
+  const [attendanceModalType, setAttendanceModalType] = useState<"manual" | "calendar" | null>(null);
+  const [selectedAttendanceRow, setSelectedAttendanceRow] = useState<number | null>(null);
+  const [leaveTypeModalType, setLeaveTypeModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedLeaveTypeRow, setSelectedLeaveTypeRow] = useState<number | null>(null);
+  const [leaveRequestModalType, setLeaveRequestModalType] = useState<"create" | "view" | null>(null);
+  const [selectedLeaveRequestRow, setSelectedLeaveRequestRow] = useState<number | null>(null);
+  const [documentModalType, setDocumentModalType] = useState<"upload" | "edit" | null>(null);
+  const [selectedDocumentRow, setSelectedDocumentRow] = useState<number | null>(null);
+  const [assetModalType, setAssetModalType] = useState<"assign" | "edit" | null>(null);
+  const [selectedAssetRow, setSelectedAssetRow] = useState<number | null>(null);
 
   const employeeActionScreens = useMemo(() => {
     if (!isEmployeeListScreen) return null;
@@ -95,18 +122,101 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
     };
   }, [isDepartmentListScreen]);
 
+  const designationActionScreens = useMemo(() => {
+    if (!isDesignationListScreen) return null;
+    const designationsSubmodule = moduleConfig
+      .find((module) => module.id === "hr")
+      ?.submodules.find((submodule) => submodule.id === "designations");
+
+    return {
+      create: designationsSubmodule?.screens.find((item) => item.id === "designations-create"),
+      edit: designationsSubmodule?.screens.find((item) => item.id === "designations-edit")
+    };
+  }, [isDesignationListScreen]);
+
+  const attendanceActionScreens = useMemo(() => {
+    if (!isAttendanceListScreen) return null;
+    const attendanceSubmodule = moduleConfig
+      .find((module) => module.id === "hr")
+      ?.submodules.find((submodule) => submodule.id === "attendance");
+
+    return {
+      manual: attendanceSubmodule?.screens.find((item) => item.id === "attendance-manual"),
+      calendar: attendanceSubmodule?.screens.find((item) => item.id === "attendance-calendar")
+    };
+  }, [isAttendanceListScreen]);
+
+  const leaveTypeActionScreens = useMemo(() => {
+    if (!isLeaveTypeListScreen) return null;
+    const leaveTypesSubmodule = moduleConfig
+      .find((module) => module.id === "hr")
+      ?.submodules.find((submodule) => submodule.id === "leave-types");
+
+    return {
+      create: leaveTypesSubmodule?.screens.find((item) => item.id === "leave-types-create"),
+      edit: leaveTypesSubmodule?.screens.find((item) => item.id === "leave-types-edit")
+    };
+  }, [isLeaveTypeListScreen]);
+
+  const leaveRequestActionScreens = useMemo(() => {
+    if (!isLeaveRequestListScreen) return null;
+    const leaveRequestSubmodule = moduleConfig
+      .find((module) => module.id === "hr")
+      ?.submodules.find((submodule) => submodule.id === "leave-request");
+
+    return {
+      create: leaveRequestSubmodule?.screens.find((item) => item.id === "leave-request-create"),
+      view: leaveRequestSubmodule?.screens.find((item) => item.id === "leave-request-view")
+    };
+  }, [isLeaveRequestListScreen]);
+
+  const documentActionScreens = useMemo(() => {
+    if (!isDocumentListScreen) return null;
+    const documentSubmodule = moduleConfig
+      .find((module) => module.id === "hr")
+      ?.submodules.find((submodule) => submodule.id === "documents");
+
+    return {
+      upload: documentSubmodule?.screens.find((item) => item.id === "documents-upload"),
+      edit: documentSubmodule?.screens.find((item) => item.id === "documents-edit")
+    };
+  }, [isDocumentListScreen]);
+
+  const assetActionScreens = useMemo(() => {
+    if (!isAssetListScreen) return null;
+    const assetsSubmodule = moduleConfig
+      .find((module) => module.id === "hr")
+      ?.submodules.find((submodule) => submodule.id === "assets");
+
+    return {
+      assign: assetsSubmodule?.screens.find((item) => item.id === "assets-assign"),
+      edit: assetsSubmodule?.screens.find((item) => item.id === "assets-edit")
+    };
+  }, [isAssetListScreen]);
+
   const employeeModalScreen = employeeModalType && employeeActionScreens ? employeeActionScreens[employeeModalType] : null;
   const departmentModalScreen =
     departmentModalType && departmentActionScreens ? departmentActionScreens[departmentModalType] : null;
+  const designationModalScreen =
+    designationModalType && designationActionScreens ? designationActionScreens[designationModalType] : null;
+  const attendanceModalScreen =
+    attendanceModalType && attendanceActionScreens ? attendanceActionScreens[attendanceModalType] : null;
+  const leaveTypeModalScreen = leaveTypeModalType && leaveTypeActionScreens ? leaveTypeActionScreens[leaveTypeModalType] : null;
+  const leaveRequestModalScreen =
+    leaveRequestModalType && leaveRequestActionScreens ? leaveRequestActionScreens[leaveRequestModalType] : null;
+  const documentModalScreen = documentModalType && documentActionScreens ? documentActionScreens[documentModalType] : null;
+  const assetModalScreen = assetModalType && assetActionScreens ? assetActionScreens[assetModalType] : null;
 
   const openEmployeeModal = (type: ListActionModalType, rowIndex?: number) => {
     setEmployeeModalType(type);
     setSelectedEmployeeRow(typeof rowIndex === "number" ? rowIndex : null);
+    setIsEmployeeProfileEditable(type !== "profile");
   };
 
   const closeEmployeeModal = () => {
     setEmployeeModalType(null);
     setSelectedEmployeeRow(null);
+    setIsEmployeeProfileEditable(false);
   };
 
   const openDepartmentModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
@@ -117,6 +227,66 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const closeDepartmentModal = () => {
     setDepartmentModalType(null);
     setSelectedDepartmentRow(null);
+  };
+
+  const openDesignationModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setDesignationModalType(type);
+    setSelectedDesignationRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeDesignationModal = () => {
+    setDesignationModalType(null);
+    setSelectedDesignationRow(null);
+  };
+
+  const openAttendanceModal = (type: "manual" | "calendar", rowIndex?: number) => {
+    setAttendanceModalType(type);
+    setSelectedAttendanceRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeAttendanceModal = () => {
+    setAttendanceModalType(null);
+    setSelectedAttendanceRow(null);
+  };
+
+  const openLeaveTypeModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setLeaveTypeModalType(type);
+    setSelectedLeaveTypeRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeLeaveTypeModal = () => {
+    setLeaveTypeModalType(null);
+    setSelectedLeaveTypeRow(null);
+  };
+
+  const openLeaveRequestModal = (type: "create" | "view", rowIndex?: number) => {
+    setLeaveRequestModalType(type);
+    setSelectedLeaveRequestRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeLeaveRequestModal = () => {
+    setLeaveRequestModalType(null);
+    setSelectedLeaveRequestRow(null);
+  };
+
+  const openDocumentModal = (type: "upload" | "edit", rowIndex?: number) => {
+    setDocumentModalType(type);
+    setSelectedDocumentRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeDocumentModal = () => {
+    setDocumentModalType(null);
+    setSelectedDocumentRow(null);
+  };
+
+  const openAssetModal = (type: "assign" | "edit", rowIndex?: number) => {
+    setAssetModalType(type);
+    setSelectedAssetRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeAssetModal = () => {
+    setAssetModalType(null);
+    setSelectedAssetRow(null);
   };
 
   return (
@@ -148,6 +318,60 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
               onClick={() => openDepartmentModal("create")}
             >
               Create Department
+            </button>
+          )}
+          {isDesignationListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openDesignationModal("create")}
+            >
+              Create Designation
+            </button>
+          )}
+          {isAttendanceListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openAttendanceModal("manual")}
+            >
+              Manual Entry
+            </button>
+          )}
+          {isLeaveTypeListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openLeaveTypeModal("create")}
+            >
+              Create Leave Type
+            </button>
+          )}
+          {isLeaveRequestListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openLeaveRequestModal("create")}
+            >
+              Create Leave
+            </button>
+          )}
+          {isDocumentListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openDocumentModal("upload")}
+            >
+              Upload Document
+            </button>
+          )}
+          {isAssetListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openAssetModal("assign")}
+            >
+              Assign Asset
             </button>
           )}
 
@@ -190,13 +414,6 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                           <button
                             className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
                             type="button"
-                            onClick={() => openEmployeeModal("edit", rowIndex)}
-                          >
-                            Edit Employee
-                          </button>
-                          <button
-                            className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
-                            type="button"
                             onClick={() => openEmployeeModal("profile", rowIndex)}
                           >
                             Employee Profile
@@ -210,6 +427,60 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                           onClick={() => openDepartmentModal("edit", rowIndex)}
                         >
                           Edit Department
+                        </button>
+                      )}
+                      {isDesignationListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openDesignationModal("edit", rowIndex)}
+                        >
+                          Edit Designation
+                        </button>
+                      )}
+                      {isAttendanceListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openAttendanceModal("calendar", rowIndex)}
+                        >
+                          View Attendance
+                        </button>
+                      )}
+                      {isLeaveTypeListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openLeaveTypeModal("edit", rowIndex)}
+                        >
+                          Edit Leave Type
+                        </button>
+                      )}
+                      {isLeaveRequestListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openLeaveRequestModal("view", rowIndex)}
+                        >
+                          View Leave
+                        </button>
+                      )}
+                      {isDocumentListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openDocumentModal("edit", rowIndex)}
+                        >
+                          Edit Document
+                        </button>
+                      )}
+                      {isAssetListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openAssetModal("edit", rowIndex)}
+                        >
+                          Edit Asset
                         </button>
                       )}
                     </div>
@@ -237,16 +508,30 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                   <p className="text-xs font-semibold text-slate-500">Employee Row {selectedEmployeeRow + 1}</p>
                 )}
               </div>
-              <button className="icon-btn" onClick={closeEmployeeModal} type="button" aria-label="Close modal">
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                {employeeModalType === "profile" && !isEmployeeProfileEditable && (
+                  <button
+                    className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+                    type="button"
+                    onClick={() => setIsEmployeeProfileEditable(true)}
+                  >
+                    Edit Employee
+                  </button>
+                )}
+                <button className="icon-btn" onClick={closeEmployeeModal} type="button" aria-label="Close modal">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
               {(employeeModalScreen.formSections ?? []).map((section) => (
                 <article key={section.title} className="rounded-xl border border-border bg-page p-3">
                   <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
-                  <FormSectionList fields={section.fields} />
+                  <FormSectionList
+                    fields={section.fields}
+                    readOnly={employeeModalType === "profile" && !isEmployeeProfileEditable}
+                  />
                 </article>
               ))}
             </div>
@@ -255,7 +540,7 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
               <button className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600" type="button" onClick={closeEmployeeModal}>
                 Cancel
               </button>
-              {employeeModalType === "profile" ? (
+              {employeeModalType === "profile" && !isEmployeeProfileEditable ? (
                 <button className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white" type="button" onClick={closeEmployeeModal}>
                   Close
                 </button>
@@ -298,6 +583,305 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                 Cancel
               </button>
               <button className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white" type="button" onClick={closeDepartmentModal}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDesignationListScreen && designationModalScreen && designationModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{designationModalScreen.title}</h3>
+                {selectedDesignationRow !== null && (
+                  <p className="text-xs font-semibold text-slate-500">Designation Row {selectedDesignationRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeDesignationModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(designationModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600" type="button" onClick={closeDesignationModal}>
+                Cancel
+              </button>
+              <button className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white" type="button" onClick={closeDesignationModal}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAttendanceListScreen && attendanceModalScreen && attendanceModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{attendanceModalScreen.title}</h3>
+                {selectedAttendanceRow !== null && attendanceModalType === "calendar" && (
+                  <p className="text-xs font-semibold text-slate-500">Employee Row {selectedAttendanceRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeAttendanceModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {attendanceModalType === "manual" ? (
+              <>
+                <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+                  {(attendanceModalScreen.formSections ?? []).map((section) => (
+                    <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                      <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                      <FormSectionList fields={section.fields} />
+                    </article>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex justify-end gap-2">
+                  <button
+                    className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                    type="button"
+                    onClick={closeAttendanceModal}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                    type="button"
+                    onClick={closeAttendanceModal}
+                  >
+                    Save
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-7 gap-2">
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+                    <div key={day} className="rounded-lg bg-brand-50 py-2 text-center text-xs font-bold text-brand-700">
+                      {day}
+                    </div>
+                  ))}
+                  {Array.from({ length: 35 }, (_, idx) => idx + 1).map((date) => (
+                    <button
+                      key={date}
+                      className="rounded-lg border border-border bg-white py-3 text-sm font-semibold text-slate-600"
+                      type="button"
+                    >
+                      {date}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                    type="button"
+                    onClick={closeAttendanceModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isLeaveTypeListScreen && leaveTypeModalScreen && leaveTypeModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{leaveTypeModalScreen.title}</h3>
+                {selectedLeaveTypeRow !== null && (
+                  <p className="text-xs font-semibold text-slate-500">Leave Type Row {selectedLeaveTypeRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeLeaveTypeModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(leaveTypeModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeLeaveTypeModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeLeaveTypeModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isLeaveRequestListScreen && leaveRequestModalScreen && leaveRequestModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{leaveRequestModalScreen.title}</h3>
+                {selectedLeaveRequestRow !== null && (
+                  <p className="text-xs font-semibold text-slate-500">Leave Row {selectedLeaveRequestRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeLeaveRequestModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(leaveRequestModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeLeaveRequestModal}
+              >
+                Cancel
+              </button>
+              {leaveRequestModalType === "view" ? (
+                <button
+                  className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                  type="button"
+                  onClick={closeLeaveRequestModal}
+                >
+                  Close
+                </button>
+              ) : (
+                <button
+                  className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                  type="button"
+                  onClick={closeLeaveRequestModal}
+                >
+                  Save
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDocumentListScreen && documentModalScreen && documentModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{documentModalScreen.title}</h3>
+                {selectedDocumentRow !== null && (
+                  <p className="text-xs font-semibold text-slate-500">Document Row {selectedDocumentRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeDocumentModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(documentModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeDocumentModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeDocumentModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAssetListScreen && assetModalScreen && assetModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{assetModalScreen.title}</h3>
+                {selectedAssetRow !== null && (
+                  <p className="text-xs font-semibold text-slate-500">Asset Row {selectedAssetRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeAssetModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(assetModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeAssetModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeAssetModal}
+              >
                 Save
               </button>
             </div>

@@ -173,7 +173,6 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
             {expanded && (
               <div className="min-w-0">
                 <p className="truncate text-sm font-extrabold tracking-wide text-slate-900">ERP FRONTEND</p>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Business Suite</p>
               </div>
             )}
           </div>
@@ -328,8 +327,29 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                           const submoduleFirstPath = submodule.screens[0]?.path ?? getFirstModulePath(module.id);
                           const isEmployeeQuickAccess = module.id === "hr" && submodule.id === "employees";
                           const isDepartmentQuickAccess = module.id === "hr" && submodule.id === "departments";
+                          const isDesignationQuickAccess = module.id === "hr" && submodule.id === "designations";
+                          const isAttendanceQuickAccess = module.id === "hr" && submodule.id === "attendance";
+                          const isLeaveTypeQuickAccess = module.id === "hr" && submodule.id === "leave-types";
+                          const isLeaveRequestQuickAccess = module.id === "hr" && submodule.id === "leave-request";
+                          const isDocumentQuickAccess = module.id === "hr" && submodule.id === "documents";
+                          const isAssetQuickAccess = module.id === "hr" && submodule.id === "assets";
+                          const isShiftQuickAccess = module.id === "hr" && submodule.id === "shifts";
+                          const isHolidayQuickAccess = module.id === "hr" && submodule.id === "holidays";
+                          const isPayrollQuickAccess = module.id === "hr" && submodule.id === "payroll";
                           const hasDropdown =
-                            !(isEmployeeQuickAccess || isDepartmentQuickAccess) &&
+                            !(
+                              isEmployeeQuickAccess ||
+                              isDepartmentQuickAccess ||
+                              isDesignationQuickAccess ||
+                              isAttendanceQuickAccess ||
+                              isLeaveTypeQuickAccess ||
+                              isLeaveRequestQuickAccess ||
+                              isDocumentQuickAccess ||
+                              isAssetQuickAccess ||
+                              isShiftQuickAccess ||
+                              isHolidayQuickAccess ||
+                              isPayrollQuickAccess
+                            ) &&
                             (submodule.screens.length > 1 || module.id !== "dashboard");
 
                           if (!hasDropdown) {
