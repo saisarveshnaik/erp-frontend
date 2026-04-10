@@ -1,11 +1,13 @@
-import { Bell, Search, UserCircle2 } from "lucide-react";
+import { Bell, PanelLeftOpen, Search, UserCircle2 } from "lucide-react";
 
 type TopBarProps = {
   onMenuClick: () => void;
+  onToggleSidebar: () => void;
+  sidebarExpanded: boolean;
   title: string;
 };
 
-const TopBar = ({ onMenuClick, title }: TopBarProps) => (
+const TopBar = ({ onMenuClick, onToggleSidebar, sidebarExpanded, title }: TopBarProps) => (
   <header className="sticky top-0 z-20 border-b border-border bg-white/90 backdrop-blur">
     <div className="flex h-16 items-center justify-between gap-3 px-4 md:px-6">
       <div className="flex items-center gap-3">
@@ -19,6 +21,16 @@ const TopBar = ({ onMenuClick, title }: TopBarProps) => (
             <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
           </svg>
         </button>
+        {!sidebarExpanded && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="hidden icon-btn md:inline-flex"
+            aria-label="Expand sidebar"
+          >
+            <PanelLeftOpen className="h-5 w-5" />
+          </button>
+        )}
         <h1 className="text-xl font-bold text-slate-800">{title}</h1>
       </div>
 

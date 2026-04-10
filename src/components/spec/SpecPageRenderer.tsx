@@ -57,14 +57,18 @@ const FormSectionList = ({ fields }: { fields: FormField[] }) => (
   </div>
 );
 
-type EmployeeModalType = "create" | "edit" | "profile";
+type ListActionModalType = "create" | "edit" | "profile";
 
 const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const isEmployeeListScreen = screen.id === "employees-list";
+  const isDepartmentListScreen = screen.id === "departments-list";
+  const hasInlineActions = isEmployeeListScreen || isDepartmentListScreen;
   const columns = screen.tableColumns ?? ["Name", "Status"];
   const rows = useMemo(() => buildRows(columns), [columns]);
-  const [employeeModalType, setEmployeeModalType] = useState<EmployeeModalType | null>(null);
+  const [employeeModalType, setEmployeeModalType] = useState<ListActionModalType | null>(null);
   const [selectedEmployeeRow, setSelectedEmployeeRow] = useState<number | null>(null);
+  const [departmentModalType, setDepartmentModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedDepartmentRow, setSelectedDepartmentRow] = useState<number | null>(null);
 
   const employeeActionScreens = useMemo(() => {
     if (!isEmployeeListScreen) return null;
@@ -79,9 +83,23 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
     };
   }, [isEmployeeListScreen]);
 
-  const employeeModalScreen = employeeModalType && employeeActionScreens ? employeeActionScreens[employeeModalType] : null;
+  const departmentActionScreens = useMemo(() => {
+    if (!isDepartmentListScreen) return null;
+    const departmentsSubmodule = moduleConfig
+      .find((module) => module.id === "hr")
+      ?.submodules.find((submodule) => submodule.id === "departments");
 
-  const openEmployeeModal = (type: EmployeeModalType, rowIndex?: number) => {
+    return {
+      create: departmentsSubmodule?.screens.find((item) => item.id === "departments-create"),
+      edit: departmentsSubmodule?.screens.find((item) => item.id === "departments-edit")
+    };
+  }, [isDepartmentListScreen]);
+
+  const employeeModalScreen = employeeModalType && employeeActionScreens ? employeeActionScreens[employeeModalType] : null;
+  const departmentModalScreen =
+    departmentModalType && departmentActionScreens ? departmentActionScreens[departmentModalType] : null;
+
+  const openEmployeeModal = (type: ListActionModalType, rowIndex?: number) => {
     setEmployeeModalType(type);
     setSelectedEmployeeRow(typeof rowIndex === "number" ? rowIndex : null);
   };
@@ -89,6 +107,16 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const closeEmployeeModal = () => {
     setEmployeeModalType(null);
     setSelectedEmployeeRow(null);
+  };
+
+  const openDepartmentModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setDepartmentModalType(type);
+    setSelectedDepartmentRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeDepartmentModal = () => {
+    setDepartmentModalType(null);
+    setSelectedDepartmentRow(null);
   };
 
   return (
@@ -113,6 +141,15 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
               Create Employee
             </button>
           )}
+          {isDepartmentListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openDepartmentModal("create")}
+            >
+              Create Department
+            </button>
+          )}
 
           <label className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -126,7 +163,7 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border">
-        <table className={clsx("w-full border-collapse text-sm", isEmployeeListScreen ? "min-w-[980px]" : "min-w-[760px]")}>
+        <table className={clsx("w-full border-collapse text-sm", hasInlineActions ? "min-w-[980px]" : "min-w-[760px]")}>
           <thead>
             <tr className="bg-brand-50/70 text-left text-xs font-bold uppercase tracking-wide text-slate-600">
               {columns.map((column) => (
@@ -134,7 +171,7 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                   {column}
                 </th>
               ))}
-              {isEmployeeListScreen && <th className="px-3 py-2 text-right">Actions</th>}
+              {hasInlineActions && <th className="px-3 py-2 text-right">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -145,23 +182,36 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                     {value}
                   </td>
                 ))}
-                {isEmployeeListScreen && (
+                {hasInlineActions && (
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
-                        type="button"
-                        onClick={() => openEmployeeModal("edit", rowIndex)}
-                      >
-                        Edit Employee
-                      </button>
-                      <button
-                        className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
-                        type="button"
-                        onClick={() => openEmployeeModal("profile", rowIndex)}
-                      >
-                        Employee Profile
-                      </button>
+                      {isEmployeeListScreen && (
+                        <>
+                          <button
+                            className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                            type="button"
+                            onClick={() => openEmployeeModal("edit", rowIndex)}
+                          >
+                            Edit Employee
+                          </button>
+                          <button
+                            className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                            type="button"
+                            onClick={() => openEmployeeModal("profile", rowIndex)}
+                          >
+                            Employee Profile
+                          </button>
+                        </>
+                      )}
+                      {isDepartmentListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openDepartmentModal("edit", rowIndex)}
+                        >
+                          Edit Department
+                        </button>
+                      )}
                     </div>
                   </td>
                 )}
@@ -214,6 +264,42 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                   Save
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDepartmentListScreen && departmentModalScreen && departmentModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{departmentModalScreen.title}</h3>
+                {selectedDepartmentRow !== null && (
+                  <p className="text-xs font-semibold text-slate-500">Department Row {selectedDepartmentRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeDepartmentModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(departmentModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600" type="button" onClick={closeDepartmentModal}>
+                Cancel
+              </button>
+              <button className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white" type="button" onClick={closeDepartmentModal}>
+                Save
+              </button>
             </div>
           </div>
         </div>

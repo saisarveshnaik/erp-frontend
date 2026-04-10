@@ -134,7 +134,23 @@ type MiniTableProps = {
 
 const MiniTable = ({ title, columns, rows }: MiniTableProps) => (
   <SectionCard title={title}>
-    <div className="overflow-x-auto">
+    <div className="space-y-2 md:hidden">
+      {rows.map((row, idx) => (
+        <article key={`${title}-mobile-${idx}`} className="rounded-lg border border-border bg-white p-3">
+          <p className="text-sm font-semibold text-slate-800">{row[0]}</p>
+          <div className="mt-2 space-y-1 text-xs text-slate-600">
+            {columns.slice(1).map((column, colIdx) => (
+              <p key={`${title}-mobile-${idx}-${column}`}>
+                <span className="font-semibold text-slate-500">{column}: </span>
+                {row[colIdx + 1]}
+              </p>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div className="hidden overflow-x-auto md:block">
       <table className="w-full min-w-[520px] border-collapse text-sm">
         <thead>
           <tr className="bg-brand-50/70 text-left text-xs font-bold uppercase tracking-wide text-slate-600">

@@ -23,8 +23,18 @@ const AppLayout = () => {
         onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
-      <div className={clsx("min-h-screen transition-[padding] duration-300 md:pl-[19rem]", !sidebarExpanded && "md:pl-20")}>
-        <TopBar title={activeScreen?.title ?? "Dashboard"} onMenuClick={() => setMobileSidebarOpen(true)} />
+      <div
+        className={clsx(
+          "min-h-screen transition-[padding-left] duration-300",
+          sidebarExpanded ? "md:pl-[19rem]" : "md:pl-0"
+        )}
+      >
+        <TopBar
+          title={activeScreen?.title ?? "Dashboard"}
+          onMenuClick={() => setMobileSidebarOpen(true)}
+          sidebarExpanded={sidebarExpanded}
+          onToggleSidebar={(() => setSidebarExpanded((value) => !value))}
+        />
 
         <main className="px-4 pb-8 pt-4 md:px-6 md:pt-5">
           <Routes>

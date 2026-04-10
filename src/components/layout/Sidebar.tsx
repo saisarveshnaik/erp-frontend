@@ -159,10 +159,10 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
 
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-40 flex h-screen w-[19rem] flex-col border-r border-border bg-white transition-all duration-300",
+          "fixed inset-y-0 left-0 z-40 flex h-screen w-[19rem] flex-col overflow-hidden border-r border-border bg-white transition-all duration-300",
           "-translate-x-full md:translate-x-0",
           mobileOpen && "translate-x-0",
-          !expanded && "md:w-20"
+          !expanded && "md:w-0 md:border-r-0"
         )}
       >
         <div className="flex items-center justify-between border-b border-border px-4 py-4">
@@ -327,7 +327,10 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                           const isActiveSubmodule = activeSubmoduleKey === submoduleKey;
                           const submoduleFirstPath = submodule.screens[0]?.path ?? getFirstModulePath(module.id);
                           const isEmployeeQuickAccess = module.id === "hr" && submodule.id === "employees";
-                          const hasDropdown = !isEmployeeQuickAccess && (submodule.screens.length > 1 || module.id !== "dashboard");
+                          const isDepartmentQuickAccess = module.id === "hr" && submodule.id === "departments";
+                          const hasDropdown =
+                            !(isEmployeeQuickAccess || isDepartmentQuickAccess) &&
+                            (submodule.screens.length > 1 || module.id !== "dashboard");
 
                           if (!hasDropdown) {
                             return (
