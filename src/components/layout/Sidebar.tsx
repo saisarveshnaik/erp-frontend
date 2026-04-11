@@ -336,6 +336,13 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                           const isShiftQuickAccess = module.id === "hr" && submodule.id === "shifts";
                           const isHolidayQuickAccess = module.id === "hr" && submodule.id === "holidays";
                           const isPayrollQuickAccess = module.id === "hr" && submodule.id === "payroll";
+                          const isInvoiceQuickAccess = module.id === "finance" && submodule.id === "invoices";
+                          const isExpenseQuickAccess = module.id === "finance" && submodule.id === "expenses";
+                          const isPaymentQuickAccess = module.id === "finance" && submodule.id === "payments";
+                          const isAccountQuickAccess = module.id === "finance" && submodule.id === "accounts";
+                          const isTransactionQuickAccess = module.id === "finance" && submodule.id === "transactions";
+                          const isVendorQuickAccess = module.id === "finance" && submodule.id === "vendors";
+                          const isCustomerQuickAccess = module.id === "finance" && submodule.id === "customers";
                           const hasDropdown =
                             !(
                               isEmployeeQuickAccess ||
@@ -348,7 +355,14 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                               isAssetQuickAccess ||
                               isShiftQuickAccess ||
                               isHolidayQuickAccess ||
-                              isPayrollQuickAccess
+                              isPayrollQuickAccess ||
+                              isInvoiceQuickAccess ||
+                              isExpenseQuickAccess ||
+                              isPaymentQuickAccess ||
+                              isAccountQuickAccess ||
+                              isTransactionQuickAccess ||
+                              isVendorQuickAccess ||
+                              isCustomerQuickAccess
                             ) &&
                             (submodule.screens.length > 1 || module.id !== "dashboard");
 

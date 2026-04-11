@@ -68,6 +68,9 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const isLeaveRequestListScreen = screen.id === "leave-request-list";
   const isDocumentListScreen = screen.id === "documents-list";
   const isAssetListScreen = screen.id === "assets-list";
+  const isInvoiceListScreen = screen.id === "invoices-list";
+  const isExpenseListScreen = screen.id === "expenses-list";
+  const isPaymentListScreen = screen.id === "payments-list";
   const hasInlineActions =
     isEmployeeListScreen ||
     isDepartmentListScreen ||
@@ -76,7 +79,10 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
     isLeaveTypeListScreen ||
     isLeaveRequestListScreen ||
     isDocumentListScreen ||
-    isAssetListScreen;
+    isAssetListScreen ||
+    isInvoiceListScreen ||
+    isExpenseListScreen ||
+    isPaymentListScreen;
   const columns = screen.tableColumns ?? ["Name", "Status"];
   const rows = useMemo(() => buildRows(columns), [columns]);
   const [employeeModalType, setEmployeeModalType] = useState<ListActionModalType | null>(null);
@@ -96,6 +102,11 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const [selectedDocumentRow, setSelectedDocumentRow] = useState<number | null>(null);
   const [assetModalType, setAssetModalType] = useState<"assign" | "edit" | null>(null);
   const [selectedAssetRow, setSelectedAssetRow] = useState<number | null>(null);
+  const [invoiceModalType, setInvoiceModalType] = useState<"create" | "view" | "edit" | null>(null);
+  const [selectedInvoiceRow, setSelectedInvoiceRow] = useState<number | null>(null);
+  const [expenseModalType, setExpenseModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedExpenseRow, setSelectedExpenseRow] = useState<number | null>(null);
+  const [paymentModalType, setPaymentModalType] = useState<"record" | null>(null);
 
   const employeeActionScreens = useMemo(() => {
     if (!isEmployeeListScreen) return null;
@@ -194,6 +205,42 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
     };
   }, [isAssetListScreen]);
 
+  const invoiceActionScreens = useMemo(() => {
+    if (!isInvoiceListScreen) return null;
+    const invoicesSubmodule = moduleConfig
+      .find((module) => module.id === "finance")
+      ?.submodules.find((submodule) => submodule.id === "invoices");
+
+    return {
+      create: invoicesSubmodule?.screens.find((item) => item.id === "invoices-create"),
+      view: invoicesSubmodule?.screens.find((item) => item.id === "invoices-view"),
+      edit: invoicesSubmodule?.screens.find((item) => item.id === "invoices-edit")
+    };
+  }, [isInvoiceListScreen]);
+
+  const expenseActionScreens = useMemo(() => {
+    if (!isExpenseListScreen) return null;
+    const expensesSubmodule = moduleConfig
+      .find((module) => module.id === "finance")
+      ?.submodules.find((submodule) => submodule.id === "expenses");
+
+    return {
+      create: expensesSubmodule?.screens.find((item) => item.id === "expenses-create"),
+      edit: expensesSubmodule?.screens.find((item) => item.id === "expenses-edit")
+    };
+  }, [isExpenseListScreen]);
+
+  const paymentActionScreens = useMemo(() => {
+    if (!isPaymentListScreen) return null;
+    const paymentsSubmodule = moduleConfig
+      .find((module) => module.id === "finance")
+      ?.submodules.find((submodule) => submodule.id === "payments");
+
+    return {
+      record: paymentsSubmodule?.screens.find((item) => item.id === "payments-record")
+    };
+  }, [isPaymentListScreen]);
+
   const employeeModalScreen = employeeModalType && employeeActionScreens ? employeeActionScreens[employeeModalType] : null;
   const departmentModalScreen =
     departmentModalType && departmentActionScreens ? departmentActionScreens[departmentModalType] : null;
@@ -206,6 +253,9 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
     leaveRequestModalType && leaveRequestActionScreens ? leaveRequestActionScreens[leaveRequestModalType] : null;
   const documentModalScreen = documentModalType && documentActionScreens ? documentActionScreens[documentModalType] : null;
   const assetModalScreen = assetModalType && assetActionScreens ? assetActionScreens[assetModalType] : null;
+  const invoiceModalScreen = invoiceModalType && invoiceActionScreens ? invoiceActionScreens[invoiceModalType] : null;
+  const expenseModalScreen = expenseModalType && expenseActionScreens ? expenseActionScreens[expenseModalType] : null;
+  const paymentModalScreen = paymentModalType && paymentActionScreens ? paymentActionScreens[paymentModalType] : null;
 
   const openEmployeeModal = (type: ListActionModalType, rowIndex?: number) => {
     setEmployeeModalType(type);
@@ -287,6 +337,34 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const closeAssetModal = () => {
     setAssetModalType(null);
     setSelectedAssetRow(null);
+  };
+
+  const openInvoiceModal = (type: "create" | "view" | "edit", rowIndex?: number) => {
+    setInvoiceModalType(type);
+    setSelectedInvoiceRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeInvoiceModal = () => {
+    setInvoiceModalType(null);
+    setSelectedInvoiceRow(null);
+  };
+
+  const openExpenseModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setExpenseModalType(type);
+    setSelectedExpenseRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeExpenseModal = () => {
+    setExpenseModalType(null);
+    setSelectedExpenseRow(null);
+  };
+
+  const openPaymentModal = (type: "record") => {
+    setPaymentModalType(type);
+  };
+
+  const closePaymentModal = () => {
+    setPaymentModalType(null);
   };
 
   return (
@@ -372,6 +450,33 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
               onClick={() => openAssetModal("assign")}
             >
               Assign Asset
+            </button>
+          )}
+          {isInvoiceListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openInvoiceModal("create")}
+            >
+              Create Invoice
+            </button>
+          )}
+          {isExpenseListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openExpenseModal("create")}
+            >
+              Create Expense
+            </button>
+          )}
+          {isPaymentListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openPaymentModal("record")}
+            >
+              Record Payment
             </button>
           )}
 
@@ -481,6 +586,33 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                           onClick={() => openAssetModal("edit", rowIndex)}
                         >
                           Edit Asset
+                        </button>
+                      )}
+                      {isInvoiceListScreen && (
+                        <>
+                          <button
+                            className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                            type="button"
+                            onClick={() => openInvoiceModal("view", rowIndex)}
+                          >
+                            View Invoice
+                          </button>
+                          <button
+                            className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                            type="button"
+                            onClick={() => openInvoiceModal("edit", rowIndex)}
+                          >
+                            Edit Invoice
+                          </button>
+                        </>
+                      )}
+                      {isExpenseListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openExpenseModal("edit", rowIndex)}
+                        >
+                          Edit Expense
                         </button>
                       )}
                     </div>
@@ -881,6 +1013,143 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                 className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
                 type="button"
                 onClick={closeAssetModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isInvoiceListScreen && invoiceModalScreen && invoiceModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{invoiceModalScreen.title}</h3>
+                {selectedInvoiceRow !== null && invoiceModalType !== "create" && (
+                  <p className="text-xs font-semibold text-slate-500">Invoice Row {selectedInvoiceRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeInvoiceModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(invoiceModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} readOnly={invoiceModalType === "view"} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeInvoiceModal}
+              >
+                Cancel
+              </button>
+              {invoiceModalType === "view" ? (
+                <button
+                  className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                  type="button"
+                  onClick={closeInvoiceModal}
+                >
+                  Close
+                </button>
+              ) : (
+                <button
+                  className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                  type="button"
+                  onClick={closeInvoiceModal}
+                >
+                  Save
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isExpenseListScreen && expenseModalScreen && expenseModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{expenseModalScreen.title}</h3>
+                {selectedExpenseRow !== null && expenseModalType === "edit" && (
+                  <p className="text-xs font-semibold text-slate-500">Expense Row {selectedExpenseRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeExpenseModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(expenseModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeExpenseModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeExpenseModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isPaymentListScreen && paymentModalScreen && paymentModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-800">{paymentModalScreen.title}</h3>
+              <button className="icon-btn" onClick={closePaymentModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(paymentModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closePaymentModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closePaymentModal}
               >
                 Save
               </button>
