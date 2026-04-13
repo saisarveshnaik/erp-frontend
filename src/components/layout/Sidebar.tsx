@@ -356,6 +356,7 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                           const isSystemPreferencesQuickAccess = module.id === "settings" && submodule.id === "system-preferences";
                           const isUsersQuickAccess = module.id === "users" && submodule.id === "users-model";
                           const isRolesQuickAccess = module.id === "users" && submodule.id === "roles-model";
+                          const isPermissionsQuickAccess = module.id === "users" && submodule.id === "permissions-model";
                           const hasDropdown =
                             !(
                               isEmployeeQuickAccess ||
@@ -388,7 +389,8 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                               isTaxConfigQuickAccess ||
                               isSystemPreferencesQuickAccess ||
                               isUsersQuickAccess ||
-                              isRolesQuickAccess
+                              isRolesQuickAccess ||
+                              isPermissionsQuickAccess
                             ) &&
                             (submodule.screens.length > 1 || module.id !== "dashboard");
 
