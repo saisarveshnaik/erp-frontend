@@ -343,6 +343,19 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                           const isTransactionQuickAccess = module.id === "finance" && submodule.id === "transactions";
                           const isVendorQuickAccess = module.id === "finance" && submodule.id === "vendors";
                           const isCustomerQuickAccess = module.id === "finance" && submodule.id === "customers";
+                          const isProductQuickAccess = module.id === "inventory" && submodule.id === "products";
+                          const isSupplierQuickAccess = module.id === "inventory" && submodule.id === "suppliers";
+                          const isCategoryQuickAccess = module.id === "inventory" && submodule.id === "categories";
+                          const isPurchaseOrderQuickAccess = module.id === "inventory" && submodule.id === "purchase-orders";
+                          const isStockQuickAccess = module.id === "inventory" && submodule.id === "stock";
+                          const isWarehouseQuickAccess = module.id === "inventory" && submodule.id === "warehouses";
+                          const isCompanyQuickAccess = module.id === "settings" && submodule.id === "company";
+                          const isCurrencyQuickAccess = module.id === "settings" && submodule.id === "currency";
+                          const isEmailConfigQuickAccess = module.id === "settings" && submodule.id === "email-config";
+                          const isTaxConfigQuickAccess = module.id === "settings" && submodule.id === "tax-config";
+                          const isSystemPreferencesQuickAccess = module.id === "settings" && submodule.id === "system-preferences";
+                          const isUsersQuickAccess = module.id === "users" && submodule.id === "users-model";
+                          const isRolesQuickAccess = module.id === "users" && submodule.id === "roles-model";
                           const hasDropdown =
                             !(
                               isEmployeeQuickAccess ||
@@ -362,7 +375,20 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                               isAccountQuickAccess ||
                               isTransactionQuickAccess ||
                               isVendorQuickAccess ||
-                              isCustomerQuickAccess
+                              isCustomerQuickAccess ||
+                              isProductQuickAccess ||
+                              isSupplierQuickAccess ||
+                              isCategoryQuickAccess ||
+                              isPurchaseOrderQuickAccess ||
+                              isStockQuickAccess ||
+                              isWarehouseQuickAccess ||
+                              isCompanyQuickAccess ||
+                              isCurrencyQuickAccess ||
+                              isEmailConfigQuickAccess ||
+                              isTaxConfigQuickAccess ||
+                              isSystemPreferencesQuickAccess ||
+                              isUsersQuickAccess ||
+                              isRolesQuickAccess
                             ) &&
                             (submodule.screens.length > 1 || module.id !== "dashboard");
 

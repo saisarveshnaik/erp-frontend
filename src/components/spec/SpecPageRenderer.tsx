@@ -71,6 +71,10 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const isInvoiceListScreen = screen.id === "invoices-list";
   const isExpenseListScreen = screen.id === "expenses-list";
   const isPaymentListScreen = screen.id === "payments-list";
+  const isProductListScreen = screen.id === "products-list";
+  const isSupplierListScreen = screen.id === "suppliers-list";
+  const isUsersListScreen = screen.id === "users-list";
+  const isRolesListScreen = screen.id === "roles-list";
   const hasInlineActions =
     isEmployeeListScreen ||
     isDepartmentListScreen ||
@@ -82,7 +86,11 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
     isAssetListScreen ||
     isInvoiceListScreen ||
     isExpenseListScreen ||
-    isPaymentListScreen;
+    isPaymentListScreen ||
+    isProductListScreen ||
+    isSupplierListScreen ||
+    isUsersListScreen ||
+    isRolesListScreen;
   const columns = screen.tableColumns ?? ["Name", "Status"];
   const rows = useMemo(() => buildRows(columns), [columns]);
   const [employeeModalType, setEmployeeModalType] = useState<ListActionModalType | null>(null);
@@ -107,6 +115,14 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const [expenseModalType, setExpenseModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
   const [selectedExpenseRow, setSelectedExpenseRow] = useState<number | null>(null);
   const [paymentModalType, setPaymentModalType] = useState<"record" | null>(null);
+  const [productModalType, setProductModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedProductRow, setSelectedProductRow] = useState<number | null>(null);
+  const [supplierModalType, setSupplierModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedSupplierRow, setSelectedSupplierRow] = useState<number | null>(null);
+  const [userModalType, setUserModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedUserRow, setSelectedUserRow] = useState<number | null>(null);
+  const [roleModalType, setRoleModalType] = useState<Exclude<ListActionModalType, "profile"> | null>(null);
+  const [selectedRoleRow, setSelectedRoleRow] = useState<number | null>(null);
 
   const employeeActionScreens = useMemo(() => {
     if (!isEmployeeListScreen) return null;
@@ -241,6 +257,54 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
     };
   }, [isPaymentListScreen]);
 
+  const productActionScreens = useMemo(() => {
+    if (!isProductListScreen) return null;
+    const productsSubmodule = moduleConfig
+      .find((module) => module.id === "inventory")
+      ?.submodules.find((submodule) => submodule.id === "products");
+
+    return {
+      create: productsSubmodule?.screens.find((item) => item.id === "products-create"),
+      edit: productsSubmodule?.screens.find((item) => item.id === "products-edit")
+    };
+  }, [isProductListScreen]);
+
+  const supplierActionScreens = useMemo(() => {
+    if (!isSupplierListScreen) return null;
+    const suppliersSubmodule = moduleConfig
+      .find((module) => module.id === "inventory")
+      ?.submodules.find((submodule) => submodule.id === "suppliers");
+
+    return {
+      create: suppliersSubmodule?.screens.find((item) => item.id === "suppliers-create"),
+      edit: suppliersSubmodule?.screens.find((item) => item.id === "suppliers-edit")
+    };
+  }, [isSupplierListScreen]);
+
+  const userActionScreens = useMemo(() => {
+    if (!isUsersListScreen) return null;
+    const usersSubmodule = moduleConfig
+      .find((module) => module.id === "users")
+      ?.submodules.find((submodule) => submodule.id === "users-model");
+
+    return {
+      create: usersSubmodule?.screens.find((item) => item.id === "users-create"),
+      edit: usersSubmodule?.screens.find((item) => item.id === "users-edit")
+    };
+  }, [isUsersListScreen]);
+
+  const roleActionScreens = useMemo(() => {
+    if (!isRolesListScreen) return null;
+    const rolesSubmodule = moduleConfig
+      .find((module) => module.id === "users")
+      ?.submodules.find((submodule) => submodule.id === "roles-model");
+
+    return {
+      create: rolesSubmodule?.screens.find((item) => item.id === "roles-create"),
+      edit: rolesSubmodule?.screens.find((item) => item.id === "roles-edit")
+    };
+  }, [isRolesListScreen]);
+
   const employeeModalScreen = employeeModalType && employeeActionScreens ? employeeActionScreens[employeeModalType] : null;
   const departmentModalScreen =
     departmentModalType && departmentActionScreens ? departmentActionScreens[departmentModalType] : null;
@@ -256,6 +320,10 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const invoiceModalScreen = invoiceModalType && invoiceActionScreens ? invoiceActionScreens[invoiceModalType] : null;
   const expenseModalScreen = expenseModalType && expenseActionScreens ? expenseActionScreens[expenseModalType] : null;
   const paymentModalScreen = paymentModalType && paymentActionScreens ? paymentActionScreens[paymentModalType] : null;
+  const productModalScreen = productModalType && productActionScreens ? productActionScreens[productModalType] : null;
+  const supplierModalScreen = supplierModalType && supplierActionScreens ? supplierActionScreens[supplierModalType] : null;
+  const userModalScreen = userModalType && userActionScreens ? userActionScreens[userModalType] : null;
+  const roleModalScreen = roleModalType && roleActionScreens ? roleActionScreens[roleModalType] : null;
 
   const openEmployeeModal = (type: ListActionModalType, rowIndex?: number) => {
     setEmployeeModalType(type);
@@ -365,6 +433,46 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
 
   const closePaymentModal = () => {
     setPaymentModalType(null);
+  };
+
+  const openProductModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setProductModalType(type);
+    setSelectedProductRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeProductModal = () => {
+    setProductModalType(null);
+    setSelectedProductRow(null);
+  };
+
+  const openSupplierModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setSupplierModalType(type);
+    setSelectedSupplierRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeSupplierModal = () => {
+    setSupplierModalType(null);
+    setSelectedSupplierRow(null);
+  };
+
+  const openUserModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setUserModalType(type);
+    setSelectedUserRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeUserModal = () => {
+    setUserModalType(null);
+    setSelectedUserRow(null);
+  };
+
+  const openRoleModal = (type: Exclude<ListActionModalType, "profile">, rowIndex?: number) => {
+    setRoleModalType(type);
+    setSelectedRoleRow(typeof rowIndex === "number" ? rowIndex : null);
+  };
+
+  const closeRoleModal = () => {
+    setRoleModalType(null);
+    setSelectedRoleRow(null);
   };
 
   return (
@@ -477,6 +585,42 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
               onClick={() => openPaymentModal("record")}
             >
               Record Payment
+            </button>
+          )}
+          {isProductListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openProductModal("create")}
+            >
+              Create Product
+            </button>
+          )}
+          {isSupplierListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openSupplierModal("create")}
+            >
+              Create Supplier
+            </button>
+          )}
+          {isUsersListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openUserModal("create")}
+            >
+              Create User
+            </button>
+          )}
+          {isRolesListScreen && (
+            <button
+              className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-700"
+              type="button"
+              onClick={() => openRoleModal("create")}
+            >
+              Create Role
             </button>
           )}
 
@@ -613,6 +757,42 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
                           onClick={() => openExpenseModal("edit", rowIndex)}
                         >
                           Edit Expense
+                        </button>
+                      )}
+                      {isProductListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openProductModal("edit", rowIndex)}
+                        >
+                          Edit Product
+                        </button>
+                      )}
+                      {isSupplierListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openSupplierModal("edit", rowIndex)}
+                        >
+                          Edit Supplier
+                        </button>
+                      )}
+                      {isUsersListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openUserModal("edit", rowIndex)}
+                        >
+                          Edit User
+                        </button>
+                      )}
+                      {isRolesListScreen && (
+                        <button
+                          className="rounded-md border border-border bg-white px-2 py-1 text-xs font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-700"
+                          type="button"
+                          onClick={() => openRoleModal("edit", rowIndex)}
+                        >
+                          Edit Role
                         </button>
                       )}
                     </div>
@@ -1157,6 +1337,182 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
           </div>
         </div>
       )}
+
+      {isProductListScreen && productModalScreen && productModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{productModalScreen.title}</h3>
+                {selectedProductRow !== null && productModalType === "edit" && (
+                  <p className="text-xs font-semibold text-slate-500">Product Row {selectedProductRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeProductModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(productModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeProductModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeProductModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSupplierListScreen && supplierModalScreen && supplierModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{supplierModalScreen.title}</h3>
+                {selectedSupplierRow !== null && supplierModalType === "edit" && (
+                  <p className="text-xs font-semibold text-slate-500">Supplier Row {selectedSupplierRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeSupplierModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(supplierModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeSupplierModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeSupplierModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isUsersListScreen && userModalScreen && userModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{userModalScreen.title}</h3>
+                {selectedUserRow !== null && userModalType === "edit" && (
+                  <p className="text-xs font-semibold text-slate-500">User Row {selectedUserRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeUserModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(userModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeUserModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeUserModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isRolesListScreen && roleModalScreen && roleModalType && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
+          <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">{roleModalScreen.title}</h3>
+                {selectedRoleRow !== null && roleModalType === "edit" && (
+                  <p className="text-xs font-semibold text-slate-500">Role Row {selectedRoleRow + 1}</p>
+                )}
+              </div>
+              <button className="icon-btn" onClick={closeRoleModal} type="button" aria-label="Close modal">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "70vh" }}>
+              {(roleModalScreen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={closeRoleModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+                type="button"
+                onClick={closeRoleModal}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </SectionCard>
   );
 };
@@ -1164,17 +1520,52 @@ const ListScreen = ({ screen }: { screen: ScreenDefinition }) => {
 const FormScreen = ({ screen }: { screen: ScreenDefinition }) => {
   const [open, setOpen] = useState(true);
   const isEdit = screen.type === "edit";
+  const isSettingsInlinePage = [
+    "settings-company",
+    "settings-currency",
+    "settings-email",
+    "settings-tax",
+    "settings-system"
+  ].includes(screen.id);
 
   return (
     <SectionCard title={screen.title}>
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-sm text-slate-500">{screen.description ?? "Create/Edit via Modal Dialog"}</p>
-        <button className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white" onClick={() => setOpen(true)} type="button">
-          Open {isEdit ? "Edit" : "Create"} Modal
-        </button>
-      </div>
+      {isSettingsInlinePage ? (
+        <>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-sm text-slate-500">{screen.description ?? "Edit directly on this page"}</p>
+          </div>
 
-      {open && (
+          <div className="rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
+            <div className="space-y-4">
+              {(screen.formSections ?? []).map((section) => (
+                <article key={section.title} className="rounded-xl border border-border bg-page p-3">
+                  <h4 className="mb-2 text-sm font-bold text-slate-700">{section.title}</h4>
+                  <FormSectionList fields={section.fields} />
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-slate-600" type="button">
+                Cancel
+              </button>
+              <button className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white" type="button">
+                Save
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-sm text-slate-500">{screen.description ?? "Create/Edit via Modal Dialog"}</p>
+            <button className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white" onClick={() => setOpen(true)} type="button">
+              Open {isEdit ? "Edit" : "Create"} Modal
+            </button>
+          </div>
+
+          {open && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/35 p-4">
           <div className="w-full max-w-5xl rounded-2xl border border-border bg-white p-4 shadow-soft md:p-5">
             <div className="mb-4 flex items-center justify-between">
@@ -1203,6 +1594,8 @@ const FormScreen = ({ screen }: { screen: ScreenDefinition }) => {
             </div>
           </div>
         </div>
+          )}
+        </>
       )}
     </SectionCard>
   );
