@@ -21,8 +21,8 @@ import {
   Wallet
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { moduleConfig } from "../../data/specConfig";
-import type { ScreenType } from "../../types/spec";
+import type { ModuleDefinition, ScreenType } from "../../types/spec";
+import type { UserRole } from "../auth/LoginPage";
 
 const moduleIcons = {
   dashboard: House,
@@ -85,28 +85,38 @@ const screenTypeIcons: Record<ScreenType, LucideIcon> = {
 type SidebarProps = {
   expanded: boolean;
   mobileOpen: boolean;
+  modules: ModuleDefinition[];
+  role: UserRole;
   onToggleExpanded: () => void;
   onCloseMobile: () => void;
 };
 
-const getFirstModulePath = (moduleId: string) =>
-  moduleConfig.find((module) => module.id === moduleId)?.submodules[0]?.screens[0]?.path ?? "/dashboard";
+const roleInfo: Record<UserRole, { initials: string; title: string }> = {
+  admin: { initials: "AD", title: "System Administrator" },
+  hr: { initials: "HR", title: "HR Manager" },
+  finance: { initials: "FN", title: "Finance Manager" },
+  inventory: { initials: "IV", title: "Inventory Manager" }
+};
 
-const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: SidebarProps) => {
+const getFirstModulePath = (modules: ModuleDefinition[], moduleId: string) =>
+  modules.find((module) => module.id === moduleId)?.submodules[0]?.screens[0]?.path ?? "/dashboard";
+
+const Sidebar = ({ expanded, mobileOpen, modules, role, onToggleExpanded, onCloseMobile }: SidebarProps) => {
   const location = useLocation();
   const [openModuleId, setOpenModuleId] = useState<string | null>(null);
   const [openSubmoduleKey, setOpenSubmoduleKey] = useState<string | null>(null);
+  const activeRoleInfo = roleInfo[role];
 
   const activeModuleId = useMemo(
     () =>
-      moduleConfig.find((module) =>
+      modules.find((module) =>
         module.submodules.some((submodule) => submodule.screens.some((screen) => screen.path === location.pathname))
       )?.id ?? null,
-    [location.pathname]
+    [location.pathname, modules]
   );
 
   const activeSubmoduleKey = useMemo(() => {
-    for (const module of moduleConfig) {
+    for (const module of modules) {
       const matchedSubmodule = module.submodules.find((submodule) =>
         submodule.screens.some((screen) => screen.path === location.pathname)
       );
@@ -115,7 +125,7 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
       }
     }
     return null;
-  }, [location.pathname]);
+  }, [location.pathname, modules]);
 
   useEffect(() => {
     setOpenModuleId(activeModuleId);
@@ -210,7 +220,7 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
               </button>
 
               <ul className="space-y-2">
-                {moduleConfig.map((module) => {
+                {modules.map((module) => {
                   const Icon = moduleIcons[module.id as keyof typeof moduleIcons] ?? House;
                   const firstPath = module.submodules[0]?.screens[0]?.path ?? "/dashboard";
                   const isModuleActive = activeModuleId === module.id;
@@ -241,11 +251,11 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
               <section className="rounded-2xl border border-border bg-page/80 p-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100 text-sm font-bold text-brand-700">
-                    EF
+                    {activeRoleInfo.initials}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-800">ERP Admin</p>
-                    <p className="truncate text-xs text-slate-500">System Administrator</p>
+                    <p className="truncate text-sm font-bold text-slate-800">ERP {role.toUpperCase()}</p>
+                    <p className="truncate text-xs text-slate-500">{activeRoleInfo.title}</p>
                   </div>
                 </div>
               </section>
@@ -259,10 +269,10 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
               </button>
 
               <div className="space-y-3 pb-4">
-                {moduleConfig.map((module) => {
+                {modules.map((module) => {
                   const ModuleIcon = moduleIcons[module.id as keyof typeof moduleIcons] ?? House;
                   if (module.id === "dashboard") {
-                    const dashboardPath = getFirstModulePath(module.id);
+                    const dashboardPath = getFirstModulePath(modules, module.id);
                     return (
                       <section key={module.id}>
                         <NavLink
@@ -285,7 +295,7 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                       </section>
                     );
                   }
-
+    
                   return (
                   <section key={module.id}>
                     <button
@@ -324,7 +334,7 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                           const submoduleKey = `${module.id}:${submodule.id}`;
                           const isOpen = openSubmoduleKey === submoduleKey;
                           const isActiveSubmodule = activeSubmoduleKey === submoduleKey;
-                          const submoduleFirstPath = submodule.screens[0]?.path ?? getFirstModulePath(module.id);
+                          const submoduleFirstPath = submodule.screens[0]?.path ?? getFirstModulePath(modules, module.id);
                           const isEmployeeQuickAccess = module.id === "hr" && submodule.id === "employees";
                           const isDepartmentQuickAccess = module.id === "hr" && submodule.id === "departments";
                           const isDesignationQuickAccess = module.id === "hr" && submodule.id === "designations";
@@ -473,7 +483,7 @@ const Sidebar = ({ expanded, mobileOpen, onToggleExpanded, onCloseMobile }: Side
                 })}
               </div>
             </div>
-          )}
+          )}         
         </div>
       </aside>
     </>

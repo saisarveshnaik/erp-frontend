@@ -6,6 +6,8 @@ type TopBarProps = {
   onToggleSidebar: () => void;
   sidebarExpanded: boolean;
   title: string;
+  roleLabel: string;
+  onLogout: () => void;
 };
 
 const notifications = [
@@ -15,7 +17,7 @@ const notifications = [
   { id: "notif-4", title: "New employee profile added", time: "Today" }
 ];
 
-const TopBar = ({ onMenuClick, onToggleSidebar, sidebarExpanded, title }: TopBarProps) => {
+const TopBar = ({ onMenuClick, onToggleSidebar, sidebarExpanded, title, roleLabel, onLogout }: TopBarProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
@@ -134,7 +136,7 @@ const TopBar = ({ onMenuClick, onToggleSidebar, sidebarExpanded, title }: TopBar
               }}
             >
               <UserCircle2 className="h-5 w-5 text-brand-600" />
-              <span className="hidden sm:inline">Profile</span>
+              <span className="hidden sm:inline">{roleLabel}</span>
             </button>
 
             {profileOpen && (
@@ -152,6 +154,7 @@ const TopBar = ({ onMenuClick, onToggleSidebar, sidebarExpanded, title }: TopBar
                 </div>
                 <button
                   type="button"
+                  onClick={onLogout}
                   className="mt-2 w-full rounded-lg border border-danger/30 bg-red-50 px-3 py-2 text-left text-sm font-semibold text-danger transition hover:bg-red-100"
                 >
                   Logout

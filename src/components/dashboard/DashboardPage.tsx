@@ -184,7 +184,7 @@ const DashboardPage = () => (
     </section>
 
     <SectionCard title="KPI Cards">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {statCards.map((card) => {
           const trend = getCardSubtext(card);
           return (
