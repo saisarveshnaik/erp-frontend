@@ -68,7 +68,8 @@ const submoduleIcons: Record<string, LucideIcon> = {
   currency: Wallet,
   "email-config": FileText,
   "tax-config": FileText,
-  "system-preferences": Settings
+  "system-preferences": Settings,
+  "theme-configuration": Settings
 };
 
 const screenTypeIcons: Record<ScreenType, LucideIcon> = {
@@ -364,6 +365,8 @@ const Sidebar = ({ expanded, mobileOpen, modules, role, onToggleExpanded, onClos
                           const isEmailConfigQuickAccess = module.id === "settings" && submodule.id === "email-config";
                           const isTaxConfigQuickAccess = module.id === "settings" && submodule.id === "tax-config";
                           const isSystemPreferencesQuickAccess = module.id === "settings" && submodule.id === "system-preferences";
+                          const isThemeConfigurationQuickAccess =
+                            module.id === "settings" && submodule.id === "theme-configuration";
                           const isUsersQuickAccess = module.id === "users" && submodule.id === "users-model";
                           const isRolesQuickAccess = module.id === "users" && submodule.id === "roles-model";
                           const isPermissionsQuickAccess = module.id === "users" && submodule.id === "permissions-model";
@@ -398,6 +401,7 @@ const Sidebar = ({ expanded, mobileOpen, modules, role, onToggleExpanded, onClos
                               isEmailConfigQuickAccess ||
                               isTaxConfigQuickAccess ||
                               isSystemPreferencesQuickAccess ||
+                              isThemeConfigurationQuickAccess ||
                               isUsersQuickAccess ||
                               isRolesQuickAccess ||
                               isPermissionsQuickAccess

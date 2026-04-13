@@ -124,7 +124,15 @@ const recentTransactions = [
   ["INV-2304", "Greenline Co", "$6,990", "2026-04-06", "Pending"]
 ];
 
-const pieColors = ["#6f4db8", "#8f6cde", "#b197ef", "#ccb9f5", "#ded4fb"];
+const chartSeriesColors = [
+  "rgb(var(--color-brand-500))",
+  "rgb(var(--color-brand-400))",
+  "rgb(var(--color-brand-300))",
+  "rgb(var(--color-brand-200))",
+  "rgb(var(--color-brand-100))"
+];
+
+const chartGridColor = "rgb(var(--color-brand-100) / 0.7)";
 
 type MiniTableProps = {
   title: string;
@@ -209,7 +217,7 @@ const DashboardPage = () => (
               <PieChart>
                 <Pie data={employeesByDepartment} dataKey="value" nameKey="name" innerRadius={42} outerRadius={78}>
                   {employeesByDepartment.map((entry, index) => (
-                    <Cell key={entry.name} fill={pieColors[index % pieColors.length]} />
+                    <Cell key={entry.name} fill={chartSeriesColors[index % chartSeriesColors.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -223,11 +231,11 @@ const DashboardPage = () => (
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={attendanceTrend}>
-                <CartesianGrid stroke="#ece8f5" vertical={false} />
+                <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="month" tick={{ fill: "#64748b", fontSize: 12 }} />
                 <YAxis tick={{ fill: "#64748b", fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey="value" fill="#6f4db8" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill="rgb(var(--color-brand-500))" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -238,12 +246,12 @@ const DashboardPage = () => (
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueVsExpense}>
-                <CartesianGrid stroke="#ece8f5" vertical={false} />
+                <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="month" tick={{ fill: "#64748b", fontSize: 12 }} />
                 <YAxis tick={{ fill: "#64748b", fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey="revenue" fill="#6f4db8" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="expense" fill="#b197ef" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="revenue" fill="rgb(var(--color-brand-500))" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="expense" fill="rgb(var(--color-brand-300))" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -256,7 +264,7 @@ const DashboardPage = () => (
               <PieChart>
                 <Pie data={expenseCategories} dataKey="value" nameKey="name" innerRadius={36} outerRadius={78}>
                   {expenseCategories.map((entry, index) => (
-                    <Cell key={entry.name} fill={pieColors[index % pieColors.length]} />
+                    <Cell key={entry.name} fill={chartSeriesColors[index % chartSeriesColors.length]} />
                   ))}
                 </Pie>
                 <Tooltip />

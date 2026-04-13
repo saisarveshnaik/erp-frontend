@@ -904,6 +904,15 @@ export const moduleConfig: ModuleDefinition[] = [
             ]
           })
         ]
+      },
+      {
+        id: "theme-configuration",
+        title: "Theme Configuration",
+        screens: [
+          screen("settings-theme", "Theme Configuration", "/settings/theme-configuration", "edit", {
+            description: "Customize the dashboard theme color palette"
+          })
+        ]
       }
     ]
   }

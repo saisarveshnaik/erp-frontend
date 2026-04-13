@@ -3,6 +3,7 @@ import { Check, ChevronDown, Search, X } from "lucide-react";
 import clsx from "clsx";
 import SectionCard from "../SectionCard";
 import { moduleConfig } from "../../data/specConfig";
+import ThemeConfigurationPage from "../settings/ThemeConfigurationPage";
 import type { FormField, ScreenDefinition } from "../../types/spec";
 
 const inputTypeLabel: Record<FormField["type"], string> = {
@@ -1723,6 +1724,7 @@ const CalendarScreen = ({ screen }: { screen: ScreenDefinition }) => {
 };
 
 const SpecPageRenderer = ({ screen }: { screen: ScreenDefinition }) => {
+  if (screen.id === "settings-theme") return <ThemeConfigurationPage />;
   if (screen.type === "list") return <ListScreen screen={screen} />;
   if (screen.type === "create" || screen.type === "edit") return <FormScreen screen={screen} />;
   if (screen.type === "view") return <ViewScreen screen={screen} />;

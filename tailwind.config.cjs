@@ -4,18 +4,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        page: "#f5f3fa",
-        card: "#ffffff",
-        border: "#e7e3ef",
+        page: "rgb(var(--color-page) / <alpha-value>)",
+        card: "rgb(var(--color-card) / <alpha-value>)",
+        border: "rgb(var(--color-border) / <alpha-value>)",
         brand: {
-          50: "#f3eefc",
-          100: "#e6dbfb",
-          200: "#ccb9f5",
-          300: "#b197ef",
-          400: "#8f6cde",
-          500: "#6f4db8",
-          600: "#5b3da1",
-          700: "#4a327f"
+          50: "rgb(var(--color-brand-50) / <alpha-value>)",
+          100: "rgb(var(--color-brand-100) / <alpha-value>)",
+          200: "rgb(var(--color-brand-200) / <alpha-value>)",
+          300: "rgb(var(--color-brand-300) / <alpha-value>)",
+          400: "rgb(var(--color-brand-400) / <alpha-value>)",
+          500: "rgb(var(--color-brand-500) / <alpha-value>)",
+          600: "rgb(var(--color-brand-600) / <alpha-value>)",
+          700: "rgb(var(--color-brand-700) / <alpha-value>)"
         },
         success: "#13a460",
         danger: "#cc4a4a"

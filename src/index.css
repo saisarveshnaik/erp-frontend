@@ -5,6 +5,22 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-page: 245 243 250;
+    --color-card: 255 255 255;
+    --color-border: 231 227 239;
+    --color-brand-50: 243 238 252;
+    --color-brand-100: 230 219 251;
+    --color-brand-200: 204 185 245;
+    --color-brand-300: 177 151 239;
+    --color-brand-400: 143 108 222;
+    --color-brand-500: 111 77 184;
+    --color-brand-600: 91 61 161;
+    --color-brand-700: 74 50 127;
+  }
+}
+
+@layer base {
   * {
     @apply border-border;
   }
@@ -12,7 +28,7 @@
   body {
     margin: 0;
     min-height: 100vh;
-    background: #f5f3fa;
+    background: rgb(var(--color-page));
     color: #1f2937;
     font-family: "Plus Jakarta Sans", sans-serif;
     -webkit-font-smoothing: antialiased;
